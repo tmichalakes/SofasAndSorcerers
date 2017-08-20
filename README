@@ -1,0 +1,13 @@
+Sofas And Sorcerers
+Unofficial D&D utility.
+
+Reads XML Files and allows management of player characters, monsters, spells, and whatever
+else you need as a DM or player.
+
+Supports backend and front-end applications.
+
+Backend
+What you'll need:
+MySQLServer 5.7
+Java Runtime Environment 1.8
+XML Files containing game data.
