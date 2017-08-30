@@ -12,6 +12,7 @@ package backend;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,12 +24,29 @@ import org.xml.sax.SAXException;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
-public class SandSXML {
+public abstract class SandSXML {
+	/**
+	 * TagMap - HashMap
+	 * 
+	 * Associates names of XML Tags with handlers that know
+	 * how to deal with tags of that name. See private class
+	 * declarations below and XMLNodeTypeHandler abstract class.
+	 */
+	protected HashMap<String, XMLNodeTypeHandler> TagMap;
+	
 	public static final String default_path = "C:/XML Files/";
 	public static final String test_filename = "fighter.xml";
-	public static final String INDENT = "  ";
+	public static final String INDENT = " ";
+	
+	public static final String TEXT_TAG   = "#text";
+	public static final String BREAK_TAG  = "br";
+	
+	public int INDENT_LEVEL;
+	
 	private String path;
 	private String filename;
+	
+	public final boolean DEBUG = false;
 	
 	public SandSXML(){
 		initialize();
@@ -42,21 +60,26 @@ public class SandSXML {
 		}
 	}
 	
-	public void initialize(){
-		path = new String();
+	public SandSXML(String fpath, String fname){
+		initialize();
+		path = fpath;
+		filename = fname;
 	}
 	
-	public void FileToStandardOut(){
-		
+	public void initialize(){
+		path = new String();
+		filename = new String();
+		TagMap = new HashMap<>();
+		INDENT_LEVEL = 0;
+	}
+	
+	public Node GetRoot(){
+		Node _ret = null;
 		try{
 			File input = new File(path + filename);
 			Scanner s = new Scanner(input);
-			///line by line reading.
-			/*while (s.hasNextLine()){
-				System.out.println(s.nextLine());
-			}
-			s.close();*/
 			
+			///Read and open the document, generate DOM.
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = factory.newDocumentBuilder();
 			Document doc = db.parse(input); ///at this point, we should have our xml file ready to go.
@@ -64,7 +87,11 @@ public class SandSXML {
 			Element r = doc.getDocumentElement();
 			Node root = (Node) r;	///treat the root as a node, but keep the reference to the element form
 			
+			if (DEBUG)
 			RecursiveNodePrint(root, "");
+			
+			///return the object
+			_ret = root;
 		}
 		/**
 		 * Catch block functionality to be determined later.
@@ -83,8 +110,18 @@ public class SandSXML {
 			e.printStackTrace();
 		}
 		
-		
+		return _ret;
 	}
+	
+	public abstract void ReadFile();
+	
+	///InitializTagMap needs to be called in 
+	///the constructor or initialization function
+	///of the child class.
+	protected abstract void InitializeTagMap();
+	
+	
+	/////////////////// STRING OUTPUT METHODS ////////////////////
 	
 	public static String NameOrText(Node n){
 		if (IsTextNode(n)){
@@ -115,8 +152,13 @@ public class SandSXML {
 		}
 	}
 	
-	public static void main(String [] args){
-		SandSXML s = new SandSXML(true);
-		s.FileToStandardOut();
+	public void PrettyPrint(String s){
+		if (s == "null" || s.trim().equals("")) return;
+		for (int i = 0; i < INDENT_LEVEL; i++){
+			System.out.print(INDENT);
+		}
+		System.out.println(s);
 	}
+
+	
 }
