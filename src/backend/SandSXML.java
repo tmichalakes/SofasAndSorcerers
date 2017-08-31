@@ -90,6 +90,7 @@ public abstract class SandSXML {
 			if (DEBUG)
 			RecursiveNodePrint(root, "");
 			
+			s.close();
 			///return the object
 			_ret = root;
 		}

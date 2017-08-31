@@ -28,13 +28,15 @@ public class SandSConnector {
 	public static final String default_db_user = "db_client";
 	public static final String default_db_pword = "";
 	
-	public static final String USE_DB = "USE ?";
+	public static final String USE_DB = "USE SandS";
 	
 	///Class vars
 	private String url;
 	private String db_name;
 	private String db_user;
 	private String db_pword;
+	
+	public boolean debug;
 	
 	///Connection and statement variables.
 	protected Connection conn;
@@ -76,6 +78,7 @@ public class SandSConnector {
 		db_name = new String();
 		db_user = new String();
 		db_pword = new String();
+		debug = false;
 	}
 	
 	public void ConnectToDB(){
@@ -87,7 +90,9 @@ public class SandSConnector {
 			Class.forName(JDBC_DRIVER);
 			
 			System.out.println("Establishing Connection...");
+			DEBUG(url + " " + db_user + " " + db_pword);
 			conn = DriverManager.getConnection(url, db_user, db_pword);
+			DEBUG("CONNECTING");
 			UseSandS();
 			System.out.println("Connection Established");
 			
@@ -106,7 +111,11 @@ public class SandSConnector {
 	
 	public void UseSandS() throws SQLException{
 		stmt = conn.prepareStatement(USE_DB);
-		stmt.setString(1, db_name);
+		//stmt.setString(1, db_name);
+		//stmt.set
+		
+		DEBUG(stmt.toString());
+		
 		stmt.execute();
 	}
 	
@@ -126,6 +135,12 @@ public class SandSConnector {
 		} catch (SQLException e) {
 			System.err.println("Unable to close connection");
 			System.exit(1);
+		}
+	}
+	
+	public void DEBUG(String s){
+		if (debug){
+			System.out.println(s);
 		}
 	}
 	
