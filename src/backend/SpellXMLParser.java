@@ -7,8 +7,11 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 public class SpellXMLParser extends SandSXML{
+	///Default variables
+	public static final String DEFAULT_FNAME = "SpellDescriptions.xml";
+	public static final String DEFAULT_PATH  = SandSXML.default_path;
 	
-	
+	///Tag variables for hash table
 	public static final String ROOT_TAG   = "all_spells";
 	public static final String SPELL_TAG  = "spell";
 	public static final String SCHOOL_TAG = "school";
@@ -19,6 +22,7 @@ public class SpellXMLParser extends SandSXML{
 	public static final String MATR_TAG   = "materials";
 	public static final String DUR_TAG    = "duration";
 	public static final String DESC_TAG	  = "description";
+	public static final String CONC_TAG   = "concentration";
 	
 	private ArrayList<Spell> SpellList;
 	private Spell current;
@@ -47,6 +51,7 @@ public class SpellXMLParser extends SandSXML{
 		TagMap.put(MATR_TAG, new MaterialsHandler());
 		TagMap.put(DUR_TAG, new DurationHandler());
 		TagMap.put(DESC_TAG, new DescriptionHandler());
+		TagMap.put(CONC_TAG, new ConcentrationHandler());
 		///break tag and text tag defined in parent.
 		TagMap.put(TEXT_TAG, new TextHandler());
 		TagMap.put(BREAK_TAG, new BreakHandler());
@@ -77,6 +82,17 @@ public class SpellXMLParser extends SandSXML{
 	/////////////////////// HANDLERS ////////////////////////////
 	/////////////////////////////////////////////////////////////
 	
+	/*
+	 * GetNodeHandler -> Returns the appropriate type of node
+	 * 	handler for the specified node.
+	 * String s -> Name of the node tag to be handled.
+	 * */
+	public XMLNodeTypeHandler GetNodeHandler(String s){
+		XMLNodeTypeHandler n = TagMap.get(s);
+		if (n == null) return new GenericNodeHandler();
+		return n;
+	}
+	
 	///Root node -> outermost closed set of brackets.
 	protected class RootHandler extends XMLNodeTypeHandler{
 		@Override
@@ -86,7 +102,7 @@ public class SpellXMLParser extends SandSXML{
 			INDENT_LEVEL++;
 			Node c = n.getFirstChild();
 			while (c != null){
-				XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+				XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 				handler.HandleNode(c);
 				c = c.getNextSibling();
 			}
@@ -104,7 +120,7 @@ public class SpellXMLParser extends SandSXML{
 			current.name = GetSpellName(n);
 			Node c = n.getFirstChild();
 			while (c != null){
-				XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+				XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 				handler.HandleNode(c);
 				c = c.getNextSibling();
 			}
@@ -123,7 +139,7 @@ public class SpellXMLParser extends SandSXML{
 			
 			INDENT_LEVEL++;
 			Node c = n.getFirstChild();
-			XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+			XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 			handler.HandleNode(c);
 			current.school = last_val;
 			INDENT_LEVEL--;
@@ -142,7 +158,7 @@ public class SpellXMLParser extends SandSXML{
 			PrettyPrint(n.getNodeName());
 			INDENT_LEVEL++;
 			Node c = n.getFirstChild();
-			XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+			XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 			handler.HandleNode(c);
 			current.SetLevel(last_val);
 			INDENT_LEVEL--;
@@ -158,7 +174,7 @@ public class SpellXMLParser extends SandSXML{
 			PrettyPrint(n.getNodeName());
 			INDENT_LEVEL++;
 			Node c = n.getFirstChild();
-			XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+			XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 			handler.HandleNode(c);
 			current.ctime = last_val;
 			INDENT_LEVEL--;
@@ -174,7 +190,7 @@ public class SpellXMLParser extends SandSXML{
 			PrettyPrint(n.getNodeName());
 			INDENT_LEVEL++;
 			Node c = n.getFirstChild();
-			XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+			XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 			handler.HandleNode(c);
 			current.range = last_val;
 			INDENT_LEVEL--;
@@ -191,7 +207,7 @@ public class SpellXMLParser extends SandSXML{
 			PrettyPrint(n.getNodeName());
 			INDENT_LEVEL++;
 			Node c = n.getFirstChild();
-			XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+			XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 			handler.HandleNode(c);
 			current.SetComponents(last_val);
 			INDENT_LEVEL--;
@@ -208,7 +224,7 @@ public class SpellXMLParser extends SandSXML{
 			PrettyPrint(n.getNodeName());
 			INDENT_LEVEL++;
 			Node c = n.getFirstChild(); if (c == null ) return;
-			XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+			XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 			handler.HandleNode(c);
 			current.materials = last_val;
 			INDENT_LEVEL--;
@@ -224,7 +240,7 @@ public class SpellXMLParser extends SandSXML{
 			PrettyPrint(n.getNodeName());
 			INDENT_LEVEL++;
 			Node c = n.getFirstChild();
-			XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+			XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 			handler.HandleNode(c);
 			current.duration = last_val;
 			INDENT_LEVEL--;
@@ -240,12 +256,27 @@ public class SpellXMLParser extends SandSXML{
 			INDENT_LEVEL++;
 			Node c = n.getFirstChild();
 			while (c != null){
-				XMLNodeTypeHandler handler = TagMap.get(c.getNodeName());
+				XMLNodeTypeHandler handler = GetNodeHandler(c.getNodeName());
 				handler.HandleNode(c);
 				current.description = current.description +  (last_val != null ? last_val : "");
 				c = c.getNextSibling();
 			}
 			INDENT_LEVEL--;
+		}
+	}
+	
+	protected class ConcentrationHandler extends XMLNodeTypeHandler{
+		@Override
+		public void HandleNode(Node n) {
+			PrettyPrint(n.getNodeName());
+			current.concentration = true;
+		}
+	}
+	
+	protected class GenericNodeHandler extends XMLNodeTypeHandler{
+		@Override
+		public void HandleNode(Node n) {
+			System.out.println("Unsupported node type: " + n.getNodeName());
 		}
 	}
 	

@@ -13,13 +13,14 @@ package backend;
 public class Spell {
 	public String name;
 	public String school;
-	private int level;
+	public int level;
 	public String ctime;
 	public String range;
-	private int components;
+	public int components;
 	public String materials;
 	public String duration;
 	public String description;
+	public boolean concentration;
 	
 	public static final int VERBAL = 4;
 	public static final int SOMATIC = 2;
@@ -39,6 +40,7 @@ public class Spell {
 		materials = null;
 		duration = "";
 		description = "";
+		concentration = false;
 	}
 	
 	public void Print(){
@@ -49,7 +51,7 @@ public class Spell {
 		System.out.println("Range: " + range);
 		System.out.println("Components: " + Components());
 		Materials();
-		System.out.println("Duration: " + duration);
+		System.out.println("Duration: " + (concentration ? "Concentration " : "" ) + duration);
 		System.out.println("----------------------");
 		System.out.println(description);
 		System.out.println("");

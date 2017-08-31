@@ -13,6 +13,7 @@ package backend;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -27,6 +28,8 @@ public class SandSConnector {
 	public static final String default_db_user = "db_client";
 	public static final String default_db_pword = "";
 	
+	public static final String USE_DB = "USE ?";
+	
 	///Class vars
 	private String url;
 	private String db_name;
@@ -34,8 +37,8 @@ public class SandSConnector {
 	private String db_pword;
 	
 	///Connection and statement variables.
-	private Connection conn;
-	private Statement stmt;
+	protected Connection conn;
+	protected PreparedStatement stmt;
 	
 	///Table name -> Explicitly for the purpose of connecting to specific tables.
 	///Use of this variable is optional, BUT all child classes will have it.
@@ -55,6 +58,19 @@ public class SandSConnector {
 		}
 	}
 	
+	public void SetDBURL(String url){
+		this.url = url;
+	}
+	public void SetDBName(String db_name){
+		this.db_name = db_name;
+	}
+	public void SetDBUser(String db_user){
+		this.db_user = db_user;
+	}
+	public void SetDBPword(String db_pword){
+		this.db_pword = db_pword;
+	}
+	
 	public void initialize(){
 		url = new String();
 		db_name = new String();
@@ -72,8 +88,7 @@ public class SandSConnector {
 			
 			System.out.println("Establishing Connection...");
 			conn = DriverManager.getConnection(url, db_user, db_pword);
-			stmt = conn.createStatement();
-			
+			UseSandS();
 			System.out.println("Connection Established");
 			
 		}catch(SQLException e){
@@ -87,6 +102,12 @@ public class SandSConnector {
 			System.err.println("Please ensure build path correctly configured.");
 			System.exit(1);
 		}
+	}
+	
+	public void UseSandS() throws SQLException{
+		stmt = conn.prepareStatement(USE_DB);
+		stmt.setString(1, db_name);
+		stmt.execute();
 	}
 	
 	public void CloseStatement(){
